@@ -1,0 +1,21 @@
+{
+  "name": "cod",
+  "version": "1.0.0",
+  "description": "call of duty",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha --recursive",
+    "start": "node start.js"
+  },
+  "author": "ronsinai",
+  "license": "ISC",
+  "dependencies": {
+    "async": "^2.6.0",
+    "mongodb": "^2.2.33"
+  },
+  "devDependencies": {
+    "chai": "^4.1.2",
+    "mocha": "^5.1.0",
+    "request": "^2.88.0"
+  }
+}
