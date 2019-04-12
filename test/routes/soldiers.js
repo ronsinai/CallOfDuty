@@ -2,35 +2,33 @@ const Async = require('async')
 const expect = require('chai').expect
 const Request = require('request')
 
-const DB = 'mongodb://localhost:27017/cod-test'
-const HOST = 'localhost'
-const PORT = 8000
-
 const Index = require('../../')
 const Helper = require('../helper')
 const SoldiersData = require('../data').soldiers
 const Soldiers = require('../../collections').soldiers
 
+const DB_PATH = 'mongodb://localhost:27017/cod-test'
+const HOST = 'localhost'
+const PORT = 8000
+const COLLECTION = 'soldiers'
+
 describe('Soldiers Routes', () => {
   before((done) => {
     Async.series({
         startServer: (next) => {
-          Index.init(PORT, HOST, DB, (err, server) => {
-            if (err) {
-              return done(err)
-            }
-      
+          Index.init(PORT, HOST, DB_PATH, (err, server) => {
+            if (err) return next(err)
+
             this.server = server
             next()
           })
         },
         connectoToDb: (next) => {
-          Helper.connectoToDb(DB, (err, db) => {
-            if (err) {
-              return next(err)
-            }
+          Helper.connectoToDb(DB_PATH, (err, db) => {
+            if (err) return next(err)
       
             this.db = db
+            this.collection = db.collection(COLLECTION)
             this.soldiers = new Soldiers(db)
             next()
           })
@@ -39,13 +37,13 @@ describe('Soldiers Routes', () => {
     )
   })
   beforeEach((done) => {
-    Helper.clearCollection(this.db, 'soldiers', done)
+    Helper.clearCollection(this.db, COLLECTION, done)
   })
 
   after((done) => {
     Async.series({
         clearSoldiersCollection: (next) => {
-          Helper.clearCollection(this.db, 'soldiers', next)
+          Helper.clearCollection(this.db, COLLECTION, next)
         },
         closeDb: (next) => {
           this.db.close(next)
@@ -60,7 +58,7 @@ describe('Soldiers Routes', () => {
   describe('#POST', () => {
     const postOptions = {
       method: 'POST',
-      url: `http://${HOST}:${PORT}/soldiers`
+      url: `http://${HOST}:${PORT}/${COLLECTION}`
     }
 
     it("should return 400 when soldier object is defected", (done) => {
@@ -74,13 +72,15 @@ describe('Soldiers Routes', () => {
       })
     })
 
-    it("should return 409 when soldier 'id' already exists", (done) => {
+    it("should return 409 when soldier '_id' already exists", (done) => {
+      const [firstSoldier, secondSoldier] = JSON.parse(JSON.stringify(SoldiersData.sameId))
+
       Async.series({
           insertFirstSoldier: (next) => {
-            this.db.collection('soldiers').insertOne(SoldiersData.sameId[0], next)
+            this.soldiers.insertSoldier(firstSoldier, next)
           },
           insertSecondSoldier: (next) => {
-            const options = Object.assign({ form: JSON.stringify(SoldiersData.sameId[1]) }, postOptions)
+            const options = Object.assign({ form: JSON.stringify(secondSoldier) }, postOptions)
             Request(options, (err, response) => {
               expect(err).to.not.exist
               expect(response).to.have.property('statusCode', 409)
@@ -93,7 +93,7 @@ describe('Soldiers Routes', () => {
 
     it("should return 404 when url path is longer than 1 item", (done) => {
       const soldier = SoldiersData.properSoldiers[0]
-      const options = Object.assign({ form: JSON.stringify(soldier)}, postOptions)
+      const options = Object.assign({ form: JSON.stringify(soldier) }, postOptions)
       options.url += '/anotherone'
 
       Request(options, (err, response) => {
@@ -105,6 +105,8 @@ describe('Soldiers Routes', () => {
 
     it("should return 204 when soldier is successfully inserted", (done) => {
       const soldier = SoldiersData.properSoldiers[0]
+      const desiredSoldier = JSON.parse(JSON.stringify(soldier))
+      desiredSoldier.duties = []
       const options = Object.assign({ form: JSON.stringify(soldier) }, postOptions)
 
       Async.series({
@@ -116,10 +118,10 @@ describe('Soldiers Routes', () => {
             })
           },
           validateInsertion: (next) => {
-            this.db.collection('soldiers').findOne(soldier, (err, dbSoldier) => {
+            this.collection.findOne(soldier, (err, dbSoldier) => {
               expect(err).to.not.exist
               expect(dbSoldier).to.exist
-              expect(JSON.stringify(dbSoldier)).to.equal(JSON.stringify(soldier))
+              expect(JSON.stringify(dbSoldier)).to.equal(JSON.stringify(desiredSoldier))
               next()
             })
           }
@@ -131,7 +133,7 @@ describe('Soldiers Routes', () => {
   describe('#GET', () => {
     const getOptions = {
       method: 'GET',
-      url: `http://${HOST}:${PORT}/soldiers`
+      url: `http://${HOST}:${PORT}/${COLLECTION}`
     }
 
     it("should return 404 when url path is longer than 2 items", (done) => {
@@ -158,25 +160,21 @@ describe('Soldiers Routes', () => {
       })
 
       it("should return 200 when soldier exists", (done) => {
-        const soldier = SoldiersData.properSoldiers[0]
+        const soldier = JSON.parse(JSON.stringify(SoldiersData.properSoldiers[0]))
 
         Async.series({
             insertSoldier: (next) => {
-              this.db.collection('soldiers').insertOne(soldier, next)
+              this.collection.insertOne(soldier, next)
             },
             findSoldier: (next) => {
               const options = Object.assign({}, getOptions)
               options.url += `/${soldier._id}`
+
               Request(options, (err, response, body) => {
                 expect(err).to.not.exist
                 expect(response).to.have.property('statusCode', 200)
                 expect(body).to.exist
-                try {
-                  body = JSON.parse(body)
-                }
-                catch (err) {
-                  next(err)
-                }
+                body = JSON.parse(body)
                 expect(body._id).to.equal(soldier._id)
                 next()
               })
@@ -201,11 +199,11 @@ describe('Soldiers Routes', () => {
       })
       
       it("should return 200 with array of all soldiers when there's no query", (done) => {
-        const soldiers = SoldiersData.properSoldiers
+        const soldiers = JSON.parse(JSON.stringify(SoldiersData.properSoldiers))
 
         Async.series({
             insertSoldiers: (next) => {
-              this.db.collection('soldiers').insert(soldiers, next)
+              this.collection.insert(soldiers, next)
             },
             findSoldiers: (next) => {
               Request(getOptions, (err, response, body) => {
@@ -222,11 +220,11 @@ describe('Soldiers Routes', () => {
       })
 
       it("should return 200 with an empty array when no soldiers matched query", (done) => {
-        const soldiers = SoldiersData.properSoldiers
+        const soldiers = JSON.parse(JSON.stringify(SoldiersData.properSoldiers))
 
         Async.series({
             insertSoldiers: (next) => {
-              this.db.collection('soldiers').insert(soldiers, next)
+              this.collection.insert(soldiers, next)
             },
             findSoldiers: (next) => {
               const options = Object.assign({ qs: { tail: 'long' } }, getOptions)
@@ -246,13 +244,13 @@ describe('Soldiers Routes', () => {
       })
 
       it("should return 200 with correct soldiers when there's query", (done) => {
-        const soldiers = SoldiersData.properSoldiers
+        const soldiers = JSON.parse(JSON.stringify(SoldiersData.properSoldiers))
         const queryName = 'Jimmy'
-        const desiredSoldiers = soldiers.filter(({ name }) => { return name === queryName })
+        const desiredSoldiers = JSON.parse(JSON.stringify(soldiers.filter(({ name }) => { return name === queryName })))
 
         Async.series({
             insertSoldiers: (next) => {
-              this.db.collection('soldiers').insert(soldiers, next)
+              this.collection.insert(soldiers, next)
             },
             findSoldiers: (next) => {
               const options = Object.assign({ qs: { name: queryName } }, getOptions)

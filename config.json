@@ -1,5 +1,5 @@
 {
   "port": 8000,
   "host": "localhost",
-  "db": "mongodb://localhost:27017/cod"
+  "dbPath": "mongodb://localhost:27017/cod"
 }

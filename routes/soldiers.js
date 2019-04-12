@@ -2,7 +2,7 @@ const Url = require('url')
 
 const Soldiers = require('../collections').soldiers
 
-function SoldiersRouter (db) {
+function SoldiersRouter(db) {
   this.soldiers = new Soldiers(db)
   
   this.route = (request, response, body) => {
@@ -48,7 +48,7 @@ function SoldiersRouter (db) {
 
     switch (urlParts.length) {
       case 1:
-        const query = Url.parse(request.url, true).query
+        const query = Url.parse(request.url, true).query || {}
         this.soldiers.findSoldiers(query, (err, soldiers) => {
           if (err) {
             response.statusCode = 400

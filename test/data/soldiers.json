@@ -1,20 +1,21 @@
 {
-  "noId": { "name": "Jimmy", "degree": "Samar" },
+  "noId": { "name": "Jimmy", "rank": "Samar" },
   "sameId": [
-    { "_id": "1", "name": "Jimmy", "degree": "Samar" },
-    { "_id": "1", "name": "Benji", "degree": "Samal" }
+    { "_id": "1", "name": "Jimmy", "rank": "Samar" },
+    { "_id": "1", "name": "Benji", "rank": "Samal" }
   ],
-  "idNumber": { "_id": 1, "name": "Jimmy", "degree": "Samar" },
-  "noName": { "_id": "1", "degree": "Samar" },
-  "nameNumber": { "_id": "1", "name": 1, "degree": "Samar" },
-  "noDegree": { "_id": "1", "name": "Jimmy" },
-  "degreeNumber": { "_id": "1", "name": "Jimmy", "degree": 1 },
-  "limitationsNumber": { "_id": "1", "name": "Jimmy", "degree": "Samar", "limitations": [1] },
-  "unfamiliarProperties": { "_id": "1", "name": "Jimmy", "degree": "Samar", "height": 182 },
-  "noLimitations": { "_id": "1", "name": "Jimmy", "degree": "Samar" },
+  "idNumber": { "_id": 1, "name": "Jimmy", "rank": "Samar" },
+  "noName": { "_id": "1", "rank": "Samar" },
+  "nameNumber": { "_id": "1", "name": 1, "rank": "Samar" },
+  "noRank": { "_id": "1", "name": "Jimmy" },
+  "rankNumber": { "_id": "1", "name": "Jimmy", "rank": 1 },
+  "limitationsNumber": { "_id": "1", "name": "Jimmy", "rank": "Samar", "limitations": [1] },
+  "limitationsString": { "_id": "1", "name": "Jimmy", "rank": "Samar", "limitations": "limit" },
+  "unfamiliarProperties": { "_id": "1", "name": "Jimmy", "rank": "Samar", "height": 182 },
+  "noLimitations": { "_id": "1", "name": "Jimmy", "rank": "Samar" },
   "properSoldiers": [
-    { "_id": "1", "name": "Jimmy", "degree": "Samar", "limitations": ["height"] },
-    { "_id": "2", "name": "Jimmy", "degree": "Samal", "limitations": [] },
-    { "_id": "3", "name": "Benji", "degree": "Rabat", "limitations": [] }
+    { "_id": "1", "name": "Jimmy", "rank": "Samar", "limitations": ["height"] },
+    { "_id": "2", "name": "Jimmy", "rank": "Samal", "limitations": [] },
+    { "_id": "3", "name": "Benji", "rank": "Rabat", "limitations": [] }
   ]
 }

@@ -1,3 +1,135 @@
 {
-  
+  "noName": {
+    "location": "horasha",
+    "days": { "start": "2019-04-01T00:00:00.000Z", "end": "2019-04-10T00:00:00.000Z" },
+    "soldiersRequired": 1,
+    "value": 10,
+    "constraints": ["weapon"]
+  },
+  "nameNumber": {
+    "name": 1,
+    "location": "horasha",
+    "days": { "start": "2019-04-01T00:00:00.000Z", "end": "2019-04-10T00:00:00.000Z" },
+    "soldiersRequired": 1,
+    "value": 10,
+    "constraints": ["weapon"]
+  },
+  "noLocation": {
+    "name": "hagnash",
+    "days": { "start": "2019-04-01T00:00:00.000Z", "end": "2019-04-10T00:00:00.000Z" },
+    "soldiersRequired": 1,
+    "value": 10,
+    "constraints": ["weapon"]
+  },
+  "locationNumber": {
+    "name": "hagnash",
+    "location": 1,
+    "days": { "start": "2019-04-01T00:00:00.000Z", "end": "2019-04-10T00:00:00.000Z" },
+    "soldiersRequired": 1,
+    "value": 10,
+    "constraints": ["weapon"]
+  },
+  "noDays": {
+    "name": "hagnash",
+    "location": "horasha",
+    "soldiersRequired": 1,
+    "value": 10,
+    "constraints": ["weapon"]
+  },
+  "daysNumber": {
+    "name": "hagnash",
+    "location": "horasha",
+    "days": 1,
+    "soldiersRequired": 1,
+    "value": 10,
+    "constraints": ["weapon"]
+  },
+  "noSoldiersRequired": {
+    "name": "hagnash",
+    "location": "horasha",
+    "days": { "start": "2019-04-01T00:00:00.000Z", "end": "2019-04-10T00:00:00.000Z" },
+    "value": 10,
+    "constraints": ["weapon"]
+  },
+  "soldiersRequiredString": {
+    "name": "hagnash",
+    "location": "horasha",
+    "days": { "start": "2019-04-01T00:00:00.000Z", "end": "2019-04-10T00:00:00.000Z" },
+    "soldiersRequired": "1",
+    "value": 10,
+    "constraints": ["weapon"]
+  },
+  "noValue": {
+    "name": "hagnash",
+    "location": "horasha",
+    "days": { "start": "2019-04-01T00:00:00.000Z", "end": "2019-04-10T00:00:00.000Z" },
+    "soldiersRequired": 1,
+    "constraints": ["weapon"]
+  },
+  "valueString": {
+    "name": "hagnash",
+    "location": "horasha",
+    "days": { "start": "2019-04-01T00:00:00.000Z", "end": "2019-04-10T00:00:00.000Z" },
+    "soldiersRequired": 1,
+    "value": "1",
+    "constraints": ["weapon"]
+  },
+  "noConstraints": {
+    "name": "hagnash",
+    "location": "horasha",
+    "days": { "start": "2019-04-01T00:00:00.000Z", "end": "2019-04-10T00:00:00.000Z" },
+    "soldiersRequired": 1,
+    "value": 10
+  },
+  "constraintsNumber": {
+    "name": "hagnash",
+    "location": "horasha",
+    "days": { "start": "2019-04-01T00:00:00.000Z", "end": "2019-04-10T00:00:00.000Z" },
+    "soldiersRequired": 1,
+    "value": 10,
+    "constraints": [1]
+  },
+  "constraintsString": {
+    "name": "hagnash",
+    "location": "horasha",
+    "days": { "start": "2019-04-01T00:00:00.000Z", "end": "2019-04-10T00:00:00.000Z" },
+    "soldiersRequired": 1,
+    "value": 10,
+    "constraints": "weapon"
+  },
+  "unfamiliarProperties": {
+    "name": "hagnash",
+    "location": "horasha",
+    "days": { "start": "2019-04-01T00:00:00.000Z", "end": "2019-04-10T00:00:00.000Z" },
+    "soldiersRequired": 1,
+    "value": 10,
+    "constraints": ["weapon"],
+    "dangerous": 100
+  },
+  "properDuties": [
+    {
+      "name": "hagnash",
+      "location": "horasha",
+      "days": { "start": "2019-04-01T00:00:00.000Z", "end": "2019-04-10T00:00:00.000Z" },
+      "soldiersRequired": 1,
+      "value": 10,
+      "constraints": ["weapon"]
+    },
+    {
+      "name": "sweep the kirya",
+      "location": "kirya",
+      "days": { "start": "2019-04-01T00:00:00.000Z", "end": "2019-04-01T00:00:00.000Z" },
+      "soldiersRequired": 2,
+      "value": 1,
+      "constraints": ["dust"]
+    },
+    {
+      "name": "elections",
+      "location": "school",
+      "days": { "start": "2019-04-09T00:00:00.000Z", "end": "2019-04-09T00:00:00.000Z" },
+      "soldiersRequired": 10,
+      "value": 20,
+      "constraints": []
+    }
+  ]
 }
