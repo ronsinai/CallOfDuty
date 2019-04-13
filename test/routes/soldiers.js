@@ -12,30 +12,23 @@ const PORT = 8000
 const COLLECTION = 'soldiers'
 
 describe('Soldiers Routes', () => {
-  before(() => {
-    return Index.init(PORT, HOST, DB_PATH)
-      .then((server) => {
-        this.server = server
-        return Helper.connectoToDb(DB_PATH)
-      })
-      .then((db) => {
-        this.db = db
-        this.collection = db.collection(COLLECTION)
-        this.soldiers = new Soldiers(db)
-      })
+  before(async () => {
+    const server = await Index.init(PORT, HOST, DB_PATH)
+    this.server = server
+    
+    const db = await Helper.connectoToDb(DB_PATH)
+    this.db = db
+    this.collection = db.collection(COLLECTION)
+    this.soldiers = new Soldiers(db)
   })
-  beforeEach(() => {
-    return Helper.clearCollection(this.db, COLLECTION)
+  beforeEach(async () => {
+    return await Helper.clearCollection(this.db, COLLECTION)
   })
 
-  after(() => {
-    return Helper.clearCollection(this.db, COLLECTION)
-      .then(() => {
-        return this.db.close()
-      })
-      .then(() => {
-        return this.server.close()
-      })
+  after(async () => {
+    await Helper.clearCollection(this.db, COLLECTION)
+    await this.db.close()
+    return await this.server.close()
   })
 
   describe('#POST', () => {
@@ -45,60 +38,60 @@ describe('Soldiers Routes', () => {
       resolveWithFullResponse: true
     }
 
-    it("should return 400 when soldier object is defected", () => {
+    it("should return 400 when soldier object is defected", async () => {
       const soldier = SoldiersData.idNumber
       const options = Object.assign({ form: JSON.stringify(soldier) }, postOptions)
 
-      return Request(options)
-        .catch((err) => {
-          expect(err).to.exist
-          expect(err).to.have.property('statusCode', 400)
-        })
+      try {
+        await Request(options)
+      }
+      catch (err) {
+        expect(err).to.exist
+        expect(err).to.have.property('statusCode', 400)
+      }
     })
 
-    it("should return 409 when soldier '_id' already exists", () => {
+    it("should return 409 when soldier '_id' already exists", async () => {
       const [firstSoldier, secondSoldier] = JSON.parse(JSON.stringify(SoldiersData.sameId))
+      const options = Object.assign({ form: JSON.stringify(secondSoldier) }, postOptions)
 
-      return this.soldiers.insertSoldier(firstSoldier)
-        .then(() => {
-          const options = Object.assign({ form: JSON.stringify(secondSoldier) }, postOptions)
-          return Request(options)
-        })
-        .catch((err) => {
-          expect(err).to.exist
-          expect(err).to.have.property('statusCode', 409)
-        })
+      await this.soldiers.insertSoldier(firstSoldier)
+      try {
+        await Request(options)
+      }
+      catch (err) {
+        expect(err).to.exist
+        expect(err).to.have.property('statusCode', 409)
+      }
     })
 
-    it("should return 404 when url path is longer than 1 item", () => {
+    it("should return 404 when url path is longer than 1 item", async () => {
       const soldier = SoldiersData.properSoldiers[0]
       const options = Object.assign({ form: JSON.stringify(soldier) }, postOptions)
       options.url += '/anotherone'
 
-      return Request(options)
-        .catch((err) => {
-          expect(err).to.exist
-          expect(err).to.have.property('statusCode', 404)
-        })
+      try {
+        await Request(options)
+      }
+      catch (err) {
+        expect(err).to.exist
+        expect(err).to.have.property('statusCode', 404)
+      }
     })
 
-    it("should return 204 when soldier is successfully inserted", () => {
+    it("should return 204 when soldier is successfully inserted", async () => {
       const soldier = SoldiersData.properSoldiers[0]
       const desiredSoldier = JSON.parse(JSON.stringify(soldier))
       desiredSoldier.duties = []
       const options = Object.assign({ form: JSON.stringify(soldier) }, postOptions)
 
-      return Request(options)
-        .then((response) => {
-          expect(response).to.exist
-          expect(response).to.have.property('statusCode', 204)
+      const response = await Request(options)
+      expect(response).to.exist
+      expect(response).to.have.property('statusCode', 204)
 
-          return this.collection.findOne(soldier)
-        })
-        .then((dbSoldier) => {
-          expect(dbSoldier).to.exist
-          expect(JSON.stringify(dbSoldier)).to.equal(JSON.stringify(desiredSoldier))
-        })
+      const dbSoldier = await this.collection.findOne(soldier)
+      expect(dbSoldier).to.exist
+      expect(JSON.stringify(dbSoldier)).to.equal(JSON.stringify(desiredSoldier))
     })
   })
 
@@ -109,106 +102,104 @@ describe('Soldiers Routes', () => {
       resolveWithFullResponse: true
     }
 
-    it("should return 404 when url path is longer than 2 items", () => {
+    it("should return 404 when url path is longer than 2 items", async () => {
       const options = Object.assign({}, getOptions)
       options.url += '/anotherone/anothertwo'
 
-      return Request(options)
-        .catch((err) => {
-          expect(err).to.exist
-          expect(err).to.have.property('statusCode', 404)
-        })
+      try {
+        await Request(options)
+      }
+      catch (err) {
+        expect(err).to.exist
+        expect(err).to.have.property('statusCode', 404)
+      }
     })
 
     describe('Single Soldier', () => {
 
-      it("should return 404 when soldier does not exist", () => {
+      it("should return 404 when soldier does not exist", async () => {
         const options = Object.assign({}, getOptions)
         options.url += '/1'
 
-        return Request(options)
-          .catch((err) => {
-            expect(err).to.exist
-            expect(err).to.have.property('statusCode', 404)
-          })
+        try {
+          await Request(options)
+        }
+        catch (err) {
+          expect(err).to.exist
+          expect(err).to.have.property('statusCode', 404)
+        }
       })
 
-      it("should return 200 when soldier exists", () => {
+      it("should return 200 when soldier exists", async () => {
         const soldier =JSON.parse(JSON.stringify( SoldiersData.properSoldiers[0]))
         const options = Object.assign({}, getOptions)
         options.url += `/${soldier._id}`
 
-        return this.collection.insertOne(soldier)
-          .then(() => { return Request(options) })
-          .then((response) => {
-            expect(response).to.exist
-            expect(response).to.have.property('statusCode', 200)
-            expect(response.body).to.exist
-            const body = JSON.parse(response.body)
-            expect(body._id).to.equal(soldier._id)
-          })
+        await this.collection.insertOne(soldier)
+        const response = await Request(options)
+
+        expect(response).to.exist
+        expect(response).to.have.property('statusCode', 200)
+        expect(response.body).to.exist
+        const body = JSON.parse(response.body)
+        expect(body._id).to.equal(soldier._id)
       })
     })
 
     describe('Multiple Soldiers', () => {
 
-      it("should return 200 with an empty array when soldiers collection is empty", () => {
-        return Request(getOptions)
-          .then((response) => {
-            expect(response).to.exist
-            expect(response).to.have.property('statusCode', 200)
-            expect(response.body).to.exist
-            const body = JSON.parse(response.body)
-            expect(body).to.be.instanceof(Array)
-            expect(body).to.have.property('length', 0)
-          })
+      it("should return 200 with an empty array when soldiers collection is empty", async () => {
+        const response = await Request(getOptions)
+        expect(response).to.exist
+        expect(response).to.have.property('statusCode', 200)
+        expect(response.body).to.exist
+        const body = JSON.parse(response.body)
+        expect(body).to.be.instanceof(Array)
+        expect(body).to.have.property('length', 0)
       })
       
-      it("should return 200 with array of all soldiers when there's no query", () => {
+      it("should return 200 with array of all soldiers when there's no query", async () => {
         const soldiers = JSON.parse(JSON.stringify(SoldiersData.properSoldiers))
 
-        return this.collection.insert(soldiers)
-          .then(() => { return Request(getOptions) })
-          .then((response) => {
-            expect(response).to.exist
-            expect(response).to.have.property('statusCode', 200)
-            expect(response.body).to.exist
-            const body = JSON.parse(response.body)
-            expect(JSON.stringify(body)).to.equal(JSON.stringify(soldiers))
-          })
+        await this.collection.insert(soldiers)
+        const response = await Request(getOptions)
+
+        expect(response).to.exist
+        expect(response).to.have.property('statusCode', 200)
+        expect(response.body).to.exist
+        const body = JSON.parse(response.body)
+        expect(JSON.stringify(body)).to.equal(JSON.stringify(soldiers))
       })
 
-      it("should return 200 with an empty array when no soldiers matched query", () => {
+      it("should return 200 with an empty array when no soldiers matched query", async () => {
         const soldiers = JSON.parse(JSON.stringify(SoldiersData.properSoldiers))
         const options = Object.assign({ qs: { tail: 'long' } }, getOptions)
 
-        return this.collection.insert(soldiers)
-          .then(() => { return Request(options) })
-          .then((response) => {
-            expect(response).to.exist
-            expect(response).to.have.property('statusCode', 200)
-            expect(response.body).to.exist
-            const body = JSON.parse(response.body)
-            expect(body).to.be.instanceof(Array)
-            expect(body).to.have.property('length', 0)
-          })
+        await this.collection.insert(soldiers)
+        const response = await Request(options)
+
+        expect(response).to.exist
+        expect(response).to.have.property('statusCode', 200)
+        expect(response.body).to.exist
+        const body = JSON.parse(response.body)
+        expect(body).to.be.instanceof(Array)
+        expect(body).to.have.property('length', 0)
       })
 
-      it("should return 200 with correct soldiers when there's query", () => {
+      it("should return 200 with correct soldiers when there's query", async () => {
         const soldiers = JSON.parse(JSON.stringify(SoldiersData.properSoldiers))
         const queryName = 'Jimmy'
         const desiredSoldiers = JSON.parse(JSON.stringify(soldiers.filter(({ name }) => { return name === queryName })))
         const options = Object.assign({ qs: { name: queryName } }, getOptions)
 
-        return this.collection.insert(soldiers)
-          .then(() => { return Request(options) })
-          .then((response) => {
-            expect(response).to.exist
-            expect(response).to.have.property('statusCode', 200)
-            expect(response.body).to.exist
-            const body = JSON.parse(response.body)
-            expect(JSON.stringify(body)).to.equal(JSON.stringify(desiredSoldiers))
-          })
+        await this.collection.insert(soldiers)
+        const response = await Request(options)
+
+        expect(response).to.exist
+        expect(response).to.have.property('statusCode', 200)
+        expect(response.body).to.exist
+        const body = JSON.parse(response.body)
+        expect(JSON.stringify(body)).to.equal(JSON.stringify(desiredSoldiers))
       })
     })
   })

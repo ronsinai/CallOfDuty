@@ -5,76 +5,67 @@ const Soldiers = require('../collections').soldiers
 function SoldiersRouter(db) {
   this.soldiers = new Soldiers(db)
   
-  this.route = (request, response, body) => {
+  this.route = async (request, response, body) => {
     switch (request.method) {
       case 'POST':
-        this.insertSoldier(request, response, body)
-        break
+        return await this.insertSoldier(request, response, body)
       case 'GET':
-        this.findSoldiers(request, response)
-        break
+        return await this.findSoldiers(request, response)
       default:
         response.statusCode = 405
         response.end()
     }
   }
 
-  this.insertSoldier = (request, response, body) => {
+  this.insertSoldier = async (request, response, body) => {
     const urlParts = request.url.split('/').filter((part) => part !== '')
 
     if (urlParts.length === 1) {
-      return this.soldiers.insertSoldier(body)
-        .then(() => {
-          response.statusCode = 204
-          response.end()
-        })
-        .catch((err) => {
-          if (err && err.message === 'Soldier _id already exists') {
-            response.statusCode = 409
-          }
-          else {
-            response.statusCode = 400
-          }
-          response.end()
-        })
+      try {
+        await this.soldiers.insertSoldier(body)
+        response.statusCode = 204
+      }
+      catch (err) {
+        if (err && err.message === 'Soldier _id already exists') {
+          response.statusCode = 409
+        }
+        else {
+          response.statusCode = 400
+        }
+        response.end()
+      }
+      return response.end()
     }
 
     response.statusCode = 404
     response.end()
   }
 
-  this.findSoldiers = (request, response) => {
+  this.findSoldiers = async (request, response) => {
     const urlParts = request.url.split('/').filter(part => part !== '')
 
     switch (urlParts.length) {
       case 1:
         const query = Url.parse(request.url, true).query || {}
-        return this.soldiers.findSoldiers(query)
-          .then((soldiers) => {
-            response.write(JSON.stringify(soldiers))
-            response.end()
-          })
-          .catch((err) => {
-            response.statusCode = 400
-            response.end()
-          })
-        break
+
+        try {
+          const soldiers = await this.soldiers.findSoldiers(query)
+          response.write(JSON.stringify(soldiers))
+        }
+        catch (err) {
+          response.statusCode = 400
+        }
+        return response.end()
       case 2:
-        return this.soldiers.findSoldier(urlParts[1])
-          .then((soldier) => {
-            if (!soldier) {
-              response.statusCode = 404
-            }
-            else {
-              response.write(JSON.stringify(soldier))
-            }
-            response.end()
-          })
-          .catch((err) => {
-            response.statusCode = 400
-            response.end()
-          })
-        break
+        try {
+          const soldier = await this.soldiers.findSoldier(urlParts[1])
+          if (!soldier) response.statusCode = 404
+          else response.write(JSON.stringify(soldier))
+        }
+        catch (err) {
+          response.statusCode = 400
+        }
+        return response.end()
       default:
         response.statusCode = 404
         response.end()

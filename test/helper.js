@@ -1,26 +1,15 @@
 const MongoClient = require('mongodb').MongoClient
 
 module.exports = {
-  connectoToDb: (db) => {
-    return new Promise((resolve, reject) => {
-      MongoClient.connect(db)
-        .then((db) => {
-          if (!db) return reject(new Error('DB failure.'))
-          resolve(db)
-        })
-        .catch(reject)
-    })
+  connectoToDb: async (dbPath) => {
+    const db = await MongoClient.connect(dbPath)
+    if (!db) throw new Error('DB failure.')
+    return db
   },
-  clearCollection: (db, collection) => {
-    return new Promise((resolve, reject) => {
-      db.listCollections({ name: collection }).next()
-        .then((collinfo) => {
-          if (collinfo) {
-            db.collection(collection).drop().then(resolve).catch(reject)
-          }
-          resolve()
-        })
-        .catch(reject)
-    })
+  clearCollection: async (db, collection) => {
+    const collinfo = await db.listCollections({ name: collection }).next()
+    if (collinfo) {
+      return await db.collection(collection).drop()
+    }
   }
 }

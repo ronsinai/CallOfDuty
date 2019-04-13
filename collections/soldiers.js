@@ -3,35 +3,22 @@ const Validations = require('../validations').soldiers
 function Soldiers(db) {
   this.soldiers = db.collection('soldiers')
 
-  this.insertSoldier = (soldier) => {
-    return new Promise((resolve, reject) => {
-      Validations.validateSoldier(this.soldiers, soldier)
-        .then(() => {
-          if (!soldier.limitations) soldier.limitations = []
-          soldier.duties = []
-          return this.soldiers.insertOne(soldier)
-        })
-        .then(resolve)
-        .catch(reject)
-    })
+  this.insertSoldier = async (soldier) => {
+    await Validations.validateSoldier(this.soldiers, soldier)
+    
+    if (!soldier.limitations) soldier.limitations = []
+    soldier.duties = []
+    return await this.soldiers.insertOne(soldier)
   }
 
-  this.findSoldier = (_id) => {
-    return new Promise((resolve, reject) => {
-      Validations.validateId(_id)
-        .then(() => { return this.soldiers.findOne({ _id }) })
-        .then(resolve)
-        .catch(reject)
-    })
+  this.findSoldier = async (_id) => {
+    await Validations.validateId(_id)
+    return await this.soldiers.findOne({ _id })
   }
 
-  this.findSoldiers = (query) => {
-    return new Promise((resolve, reject) => {
-      Validations.validateQuery(query)
-        .then(() => { return this.soldiers.find(query).toArray() })
-        .then(resolve)
-        .catch(reject)
-    })
+  this.findSoldiers = async (query) => {
+    await Validations.validateQuery(query)
+    return await this.soldiers.find(query).toArray()
   }
 }
 
