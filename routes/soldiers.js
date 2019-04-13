@@ -23,20 +23,20 @@ function SoldiersRouter(db) {
     const urlParts = request.url.split('/').filter((part) => part !== '')
 
     if (urlParts.length === 1) {
-      this.soldiers.insertSoldier(body, (err) => {
-        if (err && err.message === 'Soldier _id already exists') {
-          response.statusCode = 409
-        }
-        else if (err) {
-          response.statusCode = 400
-        }
-        else {
+      return this.soldiers.insertSoldier(body)
+        .then(() => {
           response.statusCode = 204
-        }
-
-        response.end()
-      })
-      return
+          response.end()
+        })
+        .catch((err) => {
+          if (err && err.message === 'Soldier _id already exists') {
+            response.statusCode = 409
+          }
+          else {
+            response.statusCode = 400
+          }
+          response.end()
+        })
     }
 
     response.statusCode = 404
@@ -48,32 +48,32 @@ function SoldiersRouter(db) {
 
     switch (urlParts.length) {
       case 1:
-        const query = Url.parse(request.url, true).query
-        this.soldiers.findSoldiers(query, (err, soldiers) => {
-          if (err) {
-            response.statusCode = 400
-          }
-          else {
+        const query = Url.parse(request.url, true).query || {}
+        return this.soldiers.findSoldiers(query)
+          .then((soldiers) => {
             response.write(JSON.stringify(soldiers))
-          }
-
-          response.end()
-        })
+            response.end()
+          })
+          .catch((err) => {
+            response.statusCode = 400
+            response.end()
+          })
         break
       case 2:
-        this.soldiers.findSoldier(urlParts[1], (err, soldier) => {
-          if (err) {
+        return this.soldiers.findSoldier(urlParts[1])
+          .then((soldier) => {
+            if (!soldier) {
+              response.statusCode = 404
+            }
+            else {
+              response.write(JSON.stringify(soldier))
+            }
+            response.end()
+          })
+          .catch((err) => {
             response.statusCode = 400
-          }
-          else if (!soldier) {
-            response.statusCode = 404
-          }
-          else {
-            response.write(JSON.stringify(soldier))
-          }
-
-          response.end()
-        })
+            response.end()
+          })
         break
       default:
         response.statusCode = 404

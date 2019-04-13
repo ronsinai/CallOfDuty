@@ -1,26 +1,30 @@
 const Soldiers = require('./soldiers')
 
 const internals = {
-  validateId: (_id, done) => {
-    if (!_id) {
-      return done(new Error('_id is missing'))
-    }
-    else if (!(typeof _id === 'string' || _id instanceof String)) {
-      return done(new Error('_id is not a string'))
-    }
-
-    done()
+  validateId: (_id) => {
+    return new Promise((resolve, reject) => {
+      if (!_id) {
+        return reject(new Error('_id is missing'))
+      }
+      else if (!(typeof _id === 'string' || _id instanceof String)) {
+        return reject(new Error('_id is not a string'))
+      }
+  
+      resolve()
+    })
   },
 
-  validateQuery: (query, done) => {
-    if (!query) {
-      return done(new Error('Query is missing'))
-    }
-    else if (!(typeof query === 'object')) {
-      return done(new Error('Query is not an object'))
-    }
-
-    done()
+  validateQuery: (query) => {
+    return new Promise((resolve, reject) => {
+      if (!query) {
+        return reject(new Error('Query is missing'))
+      }
+      else if (!(typeof query === 'object')) {
+        return reject(new Error('Query is not an object'))
+      }
+  
+      resolve()
+    })
   }
 }
 
